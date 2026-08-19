@@ -1,4 +1,9 @@
 # Experiment 4: DeFi Lending and Borrowing Protocol
+
+# NAME : Divya R V
+# Reg no: 212223100005
+# Department: CSE(cyber security)
+
 # Aim:
 To build a decentralized lending protocol where users can deposit assets to earn interest and borrow assets by providing collateral. This experiment introduces concepts like overcollateralization, liquidity pools, and interest accrual in DeFi.
 
@@ -31,47 +36,62 @@ Program:
 pragma solidity ^0.8.20;
 
 contract DeFiLending {
-    address public owner;
-    uint256 public interestRate = 5; // 5% interest per cycle
-    uint256 public liquidationThreshold = 150; // 150% collateralization
-    mapping(address => uint256) public deposits;
+
+    uint256 public interestRate = 20;   // 20% interest per cycle
+    uint256 public liquidationThreshold = 150; 
+
     mapping(address => uint256) public borrowed;
     mapping(address => uint256) public collateral;
 
-    event Deposited(address indexed user, uint256 amount);
-    event Borrowed(address indexed user, uint256 amount, uint256 collateral);
-    event Liquidated(address indexed user, uint256 debtRepaid, uint256 collateralSeized);
+    event Borrowed(address user, uint256 amount, uint256 collateral);
+    event InterestAdded(address user, uint256 newDebt);
+    event Liquidated(address user, uint256 collateralSeized);
 
-    constructor() {
-        owner = msg.sender;
-    }
-
-    function deposit() public payable {
-        require(msg.value > 0, "Deposit must be greater than zero");
-        deposits[msg.sender] += msg.value;
-        emit Deposited(msg.sender, msg.value);
-    }
-
+    // Borrow function (Collateral must be given here)
     function borrow(uint256 amount) public payable {
-        require(msg.value >= (amount * liquidationThreshold) / 100, "Not enough collateral");
+
+        require(msg.value >= (amount * liquidationThreshold)/100, 
+        "Not enough collateral");
+
         borrowed[msg.sender] += amount;
         collateral[msg.sender] += msg.value;
+
         payable(msg.sender).transfer(amount);
+
         emit Borrowed(msg.sender, amount, msg.value);
     }
 
+    // Interest added to increase debt
+    function addInterest() public {
+
+        uint256 interest = (borrowed[msg.sender] * interestRate)/100;
+        borrowed[msg.sender] += interest;
+
+        emit InterestAdded(msg.sender, borrowed[msg.sender]);
+    }
+
+    // Liquidation
     function liquidate(address borrower) public {
-        require(collateral[borrower] < (borrowed[borrower] * liquidationThreshold) / 100, "Not eligible for liquidation");
-        uint256 debt = borrowed[borrower];
-        uint256 seizedCollateral = collateral[borrower];
+
+        require(
+        collateral[borrower] < (borrowed[borrower] * liquidationThreshold)/100,
+        "Not eligible for liquidation"
+        );
+
+        uint seizedCollateral = collateral[borrower];
 
         borrowed[borrower] = 0;
         collateral[borrower] = 0;
-        payable(msg.sender).transfer(seizedCollateral);
-        emit Liquidated(borrower, debt, seizedCollateral);
-    }
-}
 
+        payable(msg.sender).transfer(seizedCollateral);
+
+        emit Liquidated(borrower, seizedCollateral);
+    }
+
+    // Deposit ETH into contract so it can lend
+    receive() external payable {}
+}
+ 
 ```
 # Expected Output:
 Users can deposit ETH and earn interest.
@@ -93,5 +113,14 @@ Introduces risk management: overcollateralization and liquidation.
 
 Directly related to DeFi protocols like Aave and Compound.
 
-# RESULT : 
+# OUTPUT:
+<img width="1920" height="1080" alt="Screenshot 2026-08-19 111112" src="https://github.com/user-attachments/assets/a19ddb08-2c83-4be1-abdd-0ce1e43e037d" />
 
+<img width="1920" height="1080" alt="Screenshot 2026-08-19 111130" src="https://github.com/user-attachments/assets/5a2a4d3f-5d66-4d5c-86b1-32c8d38d1418" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/47b5fed5-9915-4cf9-8a77-476df3a3b151" />
+
+<img width="1920" height="1080" alt="Screenshot 2026-08-19 111149" src="https://github.com/user-attachments/assets/0bd91106-de6a-41a4-abcd-d20720e48118" />
+
+# RESULT : 
+Thus decentralized lending protocol where users can deposit assets to earn interest and borrow assets by providing collateral is executed successfully.
